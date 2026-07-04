@@ -1,0 +1,132 @@
+--// Vira Band + Dark Lord Blade System
+--// Put this in a LocalScript inside StarterPlayerScripts
+--// Made for Roblox Studio Lite
+
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+
+--// GUI
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "ViraUI"
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+--// Blade Button
+local bladeButton = Instance.new("TextButton")
+bladeButton.Size = UDim2.new(0,140,0,45)
+bladeButton.Position = UDim2.new(1,-150,0.65,0)
+bladeButton.Text = "Vira Blade"
+bladeButton.BackgroundColor3 = Color3.fromRGB(20,20,20)
+bladeButton.TextColor3 = Color3.fromRGB(0,255,0)
+bladeButton.Visible = false
+bladeButton.Parent = screenGui
+
+--// Fireball Button
+local fireballButton = Instance.new("TextButton")
+fireballButton.Size = UDim2.new(0,140,0,45)
+fireballButton.Position = UDim2.new(1,-150,0.75,0)
+fireballButton.Text = "Fire Ball"
+fireballButton.BackgroundColor3 = Color3.fromRGB(40,0,0)
+fireballButton.TextColor3 = Color3.fromRGB(255,120,0)
+fireballButton.Visible = false
+fireballButton.Parent = screenGui
+
+local bladeEquipped = false
+local blade
+
+--// Check for Vira Band
+local function hasViraBand()
+	local char = player.Character
+	if char then
+		return char:FindFirstChild("ViraBand")
+	end
+	return nil
+end
+
+--// Show buttons when band equipped
+local function updateButtons()
+	if hasViraBand() then
+		bladeButton.Visible = true
+		fireballButton.Visible = true
+	else
+		bladeButton.Visible = false
+		fireballButton.Visible = false
+	end
+end
+
+--// Create Blade
+local function equipBlade()
+	local char = player.Character
+	if not char then return end
+	
+	local hand = char:FindFirstChild("RightHand") or char:FindFirstChild("Right Arm")
+	if not hand then return end
+	
+	blade = Instance.new("Part")
+	blade.Name = "DarkLordBlade"
+	blade.Size = Vector3.new(0.3,4,1)
+	blade.Material = Enum.Material.Neon
+	blade.Color = Color3.fromRGB(0,255,0)
+	blade.CanCollide = false
+	blade.Parent = char
+	
+	local weld = Instance.new("WeldConstraint")
+	weld.Part0 = blade
+	weld.Part1 = hand
+	weld.Parent = blade
+	
+	blade.CFrame = hand.CFrame * CFrame.new(0,-1,-1)
+end
+
+--// Remove Blade
+local function removeBlade()
+	if blade then
+		blade:Destroy()
+		blade = nil
+	end
+end
+
+--// Blade Toggle
+bladeButton.MouseButton1Click:Connect(function()
+	bladeEquipped = not bladeEquipped
+	
+	if bladeEquipped then
+		equipBlade()
+	else
+		removeBlade()
+	end
+end)
+
+--// Fireball Ability
+fireballButton.MouseButton1Click:Connect(function()
+	local char = player.Character
+	if not char then return end
+	
+	local root = char:FindFirstChild("HumanoidRootPart")
+	if not root then return end
+	
+	local fireball = Instance.new("Part")
+	fireball.Shape = Enum.PartType.Ball
+	fireball.Material = Enum.Material.Neon
+	fireball.Color = Color3.fromRGB(255,80,0)
+	fireball.Size = Vector3.new(3,3,3)
+	fireball.CFrame = root.CFrame * CFrame.new(0,0,-5)
+	fireball.CanCollide = false
+	fireball.Parent = workspace
+	
+	local fire = Instance.new("Fire")
+	fire.Size = 10
+	fire.Parent = fireball
+	
+	local bodyVelocity = Instance.new("BodyVelocity")
+	bodyVelocity.MaxForce = Vector3.new(99999,99999,99999)
+	bodyVelocity.Velocity = root.CFrame.LookVector * 120
+	bodyVelocity.Parent = fireball
+	
+	game.Debris:AddItem(fireball,5)
+end)
+
+--// Detect Band
+character.ChildAdded:Connect(updateButtons)
+character.ChildRemoved:Connect(updateButtons)
+
+updateButtons()
