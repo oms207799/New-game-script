@@ -1,0 +1,79 @@
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+-- GUI
+local gui = Instance.new("ScreenGui")
+gui.Name = "MorphUI"
+gui.Parent = player:WaitForChild("PlayerGui")
+
+-- Toggle button
+local toggle = Instance.new("TextButton")
+toggle.Size = UDim2.new(0, 120, 0, 40)
+toggle.Position = UDim2.new(0, 10, 0, 10)
+toggle.Text = "MORPH"
+toggle.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
+toggle.TextColor3 = Color3.fromRGB(255,255,255)
+toggle.Parent = gui
+
+-- Frame (scrollable)
+local frame = Instance.new("ScrollingFrame")
+frame.Size = UDim2.new(0, 260, 0, 300)
+frame.Position = UDim2.new(0, 10, 0, 60)
+frame.BackgroundTransparency = 1
+frame.Visible = false
+frame.ScrollBarThickness = 6
+frame.CanvasSize = UDim2.new(0,0,0,500)
+frame.Parent = gui
+
+-- Title
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 40)
+title.BackgroundTransparency = 1
+title.Text = "MORPH"
+title.TextColor3 = Color3.fromRGB(0,255,0)
+title.TextScaled = true
+title.Parent = frame
+
+-- Toggle open/close
+toggle.MouseButton1Click:Connect(function()
+	frame.Visible = not frame.Visible
+end)
+
+-- MORPH FUNCTION (CLIENT ONLY)
+local function morphToOwner()
+	local char = player.Character
+	if not char then return end
+
+	local morphModel = game.ReplicatedStorage:WaitForChild("Morphs"):FindFirstChild("OwnerMorph")
+	if not morphModel then
+		warn("Morph not found")
+		return
+	end
+
+	local newChar = morphModel:Clone()
+	newChar.Name = player.Name
+	newChar.Parent = workspace
+
+	newChar:PivotTo(char:GetPivot())
+
+	player.Character = newChar
+end
+
+-- Owner button with image
+local ownerBtn = Instance.new("ImageButton")
+ownerBtn.Size = UDim2.new(1, -20, 0, 80)
+ownerBtn.Position = UDim2.new(0, 10, 0, 60)
+ownerBtn.BackgroundColor3 = Color3.fromRGB(40,40,40)
+ownerBtn.Image = "rbxthumb://type=AvatarHeadShot&id=1&w=150&h=150"
+ownerBtn.Parent = frame
+
+local text = Instance.new("TextLabel")
+text.Size = UDim2.new(1,0,1,0)
+text.BackgroundTransparency = 1
+text.Text = "Owner Morph (oms207799)"
+text.TextColor3 = Color3.fromRGB(255,255,255)
+text.Parent = ownerBtn
+
+ownerBtn.MouseButton1Click:Connect(function()
+	morphToOwner()
+end)
